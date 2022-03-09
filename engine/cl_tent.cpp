@@ -25,20 +25,133 @@ void CL_TempEntInit()
 
 TEMPENTITY* CL_TempEntAlloc( vec_t* org, model_t* model )
 {
-	//TODO: implement - Solokiller
-	return nullptr;
+	cl_entity_t* dest;
+	TEMPENTITY* pTVar1;
+	TEMPENTITY* pTVar2;
+
+	pTVar2 = gpTempEntFree;
+	if (gpTempEntFree == NULL) {
+		Con_DPrintf("Overflow %d temporary ents!\n", 500);
+	}
+	else if (model == NULL) {
+		pTVar2 = NULL;
+		Con_DPrintf("efx.CL_TempEntAlloc: No model\n");
+	}
+	else {
+		dest = &gpTempEntFree->entity;
+		gpTempEntFree = gpTempEntFree->next;
+		Q_memset(dest, 0, 3000);
+		pTVar2->flags = FTENT_NONE;
+		(pTVar2->entity).curstate.colormap = 0;
+		pTVar2->die = cl.time + 0.75;
+		(pTVar2->entity).model = model;
+		(pTVar2->entity).curstate.rendermode = 0;
+		(pTVar2->entity).curstate.renderfx = 0;
+		pTVar2->fadeSpeed = 0.5;
+		pTVar2->hitSound = 0;
+		pTVar2->clientIndex = -1;
+		pTVar2->bounceFactor = 1.0;
+		pTVar2->hitcallback = NULL;
+		pTVar2->callback = NULL;
+		pTVar2->priority = 0;
+		(pTVar2->entity).origin[0] = *org;
+		(pTVar2->entity).origin[1] = org[1];
+		(pTVar2->entity).origin[2] = org[2];
+		pTVar1 = gpTempEntActive;
+		gpTempEntActive = pTVar2;
+		pTVar2->next = pTVar1;
+	}
+	return pTVar2;
 }
 
 TEMPENTITY* CL_TempEntAllocNoModel( vec_t* org )
 {
-	//TODO: implement - Solokiller
-	return nullptr;
+	cl_entity_t* dest;
+	TEMPENTITY* pTVar1;
+	TEMPENTITY* pTVar2;
+
+	pTVar1 = gpTempEntFree;
+	if (gpTempEntFree == NULL) {
+		Con_DPrintf("Overflow %d temporary ents!\n", 500);
+	}
+	else {
+		dest = &gpTempEntFree->entity;
+		gpTempEntFree = gpTempEntFree->next;
+		Q_memset(dest, 0, 3000);
+		pTVar1->flags = 0;
+		(pTVar1->entity).curstate.colormap = 0;
+		pTVar1->die = cl.time + 0.75;
+		(pTVar1->entity).model = NULL;
+		(pTVar1->entity).curstate.rendermode = 0;
+		pTVar1->flags = FTENT_NOMODEL;
+		(pTVar1->entity).curstate.renderfx = 0;
+		pTVar1->fadeSpeed = 0.5;
+		pTVar1->hitSound = 0;
+		pTVar1->clientIndex = -1;
+		pTVar1->bounceFactor = 1.0;
+		pTVar1->hitcallback = NULL;
+		pTVar1->callback = NULL;
+		pTVar1->priority = 0;
+		(pTVar1->entity).origin[0] = *org;
+		(pTVar1->entity).origin[1] = org[1];
+		(pTVar1->entity).origin[2] = org[2];
+		pTVar2 = gpTempEntActive;
+		gpTempEntActive = pTVar1;
+		pTVar1->next = pTVar2;
+	}
+	return pTVar1;
 }
 
 TEMPENTITY* CL_TempEntAllocHigh( vec_t* org, model_t* model )
 {
-	//TODO: implement - Solokiller
-	return nullptr;
+	tempent_s** pptVar1;
+	TEMPENTITY* pTVar2;
+	tempent_s* ptVar3;
+	TEMPENTITY* pTVar4;
+
+	pTVar2 = gpTempEntActive;
+	pTVar4 = gpTempEntFree;
+	if (model == NULL) {
+		pTVar4 = NULL;
+		Con_DPrintf("temporary ent model invalid\n");
+	}
+	else if (gpTempEntFree == NULL) {
+		ptVar3 = gpTempEntActive;
+		if (gpTempEntActive != NULL) {
+			do {
+				if (ptVar3->priority == 0) goto INIT_ENTITY;
+				ptVar3 = ptVar3->next;
+			} while (ptVar3 != NULL);
+		}
+		Con_DPrintf("Couldn't alloc a high priority TENT!\n");
+	}
+	else {
+		gpTempEntActive = gpTempEntFree;
+		pptVar1 = &gpTempEntFree->next;
+		gpTempEntFree = gpTempEntFree->next;
+		*pptVar1 = pTVar2;
+		ptVar3 = pTVar4;
+	INIT_ENTITY:
+		Q_memset(&ptVar3->entity, 0, 3000);
+		(ptVar3->entity).curstate.colormap = 0;
+		ptVar3->flags = FTENT_NONE;
+		ptVar3->die = cl.time + 0.75;
+		(ptVar3->entity).curstate.rendermode = 0;
+		(ptVar3->entity).model = model;
+		(ptVar3->entity).curstate.renderfx = 0;
+		ptVar3->fadeSpeed = 0.5;
+		ptVar3->hitSound = 0;
+		ptVar3->clientIndex = -1;
+		ptVar3->bounceFactor = 1.0;
+		ptVar3->hitcallback = NULL;
+		ptVar3->callback = NULL;
+		ptVar3->priority = 1;
+		(ptVar3->entity).origin[0] = *org;
+		(ptVar3->entity).origin[1] = org[1];
+		(ptVar3->entity).origin[2] = org[2];
+		pTVar4 = ptVar3;
+	}
+	return pTVar4;
 }
 
 TEMPENTITY* CL_AllocCustomTempEntity( float* origin, model_t* model, int high, void( *callback )( TEMPENTITY*, float, float ) )
@@ -204,10 +317,37 @@ TEMPENTITY* R_TempSprite( float* pos, float* dir, float scale, int modelIndex, i
 
 void R_AttachTentToPlayer( int client, int modelIndex, float zoffset, float life )
 {
-	//TODO: implement - Solokiller
+	/*model_t* pModel;
+
+	pModel = CL_GetModelByIndex(modelIndex); // TODO: impl - xWhitey
+	if (pModel != (model_t*)0x0) {
+		R_AttachTentToPlayer2(client, pModel, zoffset, life); // TODO: impl - xWhitey
+		return;
+	}
+	Con_Printf("No model %d!\n");
+	return;*/
 }
 
 void R_KillAttachedTents( int client )
 {
-	//TODO: implement - Solokiller
+	tempent_s* ptVar1;
+
+	if ((client > -1) && (client <= cl.maxclients)) {
+		ptVar1 = gpTempEntActive;
+		if (gpTempEntActive != NULL) {
+			do {
+				while (((ptVar1->flags & FTENT_PLYRATTACHMENT) == 0 || (ptVar1->clientIndex != client))) {
+					ptVar1 = ptVar1->next;
+					if (ptVar1 == NULL) {
+						return;
+					}
+				}
+				ptVar1->die = cl.time;
+				ptVar1 = ptVar1->next;
+			} while (ptVar1 != NULL);
+		}
+		return;
+	}
+	Con_Printf("Bad client in R_KillAttachedTents()!\n");
+	return;
 }
