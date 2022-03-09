@@ -78,6 +78,8 @@ TEMPENTITY* R_TempSprite( float* pos, float* dir, float scale, int modelIndex, i
 
 void R_AttachTentToPlayer( int client, int modelIndex, float zoffset, float life );
 
+void R_AttachTentToPlayer2( int client, model_s* pModel, float zoffset, float life );
+
 void R_KillAttachedTents( int client );
 
 #endif //ENGINE_CL_TENT_H

@@ -315,9 +315,56 @@ TEMPENTITY* R_TempSprite( float* pos, float* dir, float scale, int modelIndex, i
 	return nullptr;
 }
 
+void R_AttachTentToPlayer2(int client, model_s* pModel, float zoffset, float life)
+{
+	model_s* pmVar1;
+	TEMPENTITY* pTVar2;
+	int iVar3;
+	vec3_t position;
+
+	if ((-1 < client) && (client <= cl.maxclients)) {
+		// TODO: impl - xWhitey
+		if (true /*cl_entit.curstate.messagenum == cl.parsecount*/) { // There's prob should be CL_GetEntityByIndex, but its definition doesn't exist here
+			//position[0] = cl_entities[client].origin[0];             } the same as             ^^^^^^^^^^^^
+			//position[2] = zoffset + cl_entities[client].origin[2];   }
+			//position[1] = cl_entities[client].origin[1];             }
+			pTVar2 = (*efx.CL_TempEntAllocHigh)(position, pModel);
+			if (pTVar2 != NULL) {
+				(pTVar2->entity).curstate.rendermode = 0;
+				pTVar2->tentOffset[2] = zoffset;
+				(pTVar2->entity).curstate.renderfx = 0xe;
+				(pTVar2->entity).curstate.renderamt = 0xff;
+				(pTVar2->entity).baseline.renderamt = 0xff;
+				(pTVar2->entity).curstate.framerate = 1.0;
+				pTVar2->clientIndex = (short)client;
+				pTVar2->tentOffset[0] = 0.0;
+				pTVar2->tentOffset[1] = 0.0;
+				pTVar2->die = life + (float)cl.time;
+				pmVar1 = (pTVar2->entity).model;
+				pTVar2->flags = pTVar2->flags | 0xa000;
+				if (pmVar1->type == mod_sprite) {
+					//iVar3 = ModelFrameCount(pModel); TODO: impl - xWhitey
+					pTVar2->flags = pTVar2->flags | 0x10100; // unknown flag?? - xWhitey
+					(pTVar2->entity).curstate.framerate = 10.0;
+					pTVar2->frameMax = (float)iVar3;
+				}
+				else {
+					pTVar2->frameMax = 0.0;
+				}
+				(pTVar2->entity).curstate.frame = 0.0;
+				return;
+			}
+			Con_Printf("No temp ent.\n");
+		}
+		return;
+	}
+	Con_Printf("Bad client in R_AttachTentToPlayer()!\n");
+	return;
+}
+
 void R_AttachTentToPlayer( int client, int modelIndex, float zoffset, float life )
 {
-	/*model_t* pModel;
+	model_t* pModel;
 
 	pModel = CL_GetModelByIndex(modelIndex); // TODO: impl - xWhitey
 	if (pModel != (model_t*)0x0) {
@@ -325,7 +372,7 @@ void R_AttachTentToPlayer( int client, int modelIndex, float zoffset, float life
 		return;
 	}
 	Con_Printf("No model %d!\n");
-	return;*/
+	return;
 }
 
 void R_KillAttachedTents( int client )
