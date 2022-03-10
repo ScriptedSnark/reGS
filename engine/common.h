@@ -65,6 +65,14 @@ void SZ_Print( sizebuf_t* buf, const char* data );
 extern char gpszProductString[ 32 ];
 extern char gpszVersionString[ 32 ];
 
+// Should be replaced with normal defines as Valve did this. - xWhitey
+/*extern short (*BigShort) (short l);
+extern short (*LittleShort) (short l);
+extern int (*BigLong) (int l);
+extern int (*LittleLong) (int l);
+extern float (*BigFloat) (float l);
+extern float (*LittleFloat) (float l);*/
+
 extern int com_argc;
 extern const char** com_argv;
 extern char com_gamedir[ FILENAME_MAX ];

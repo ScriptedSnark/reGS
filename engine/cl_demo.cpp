@@ -25,38 +25,87 @@ demo_api_t demoapi =
 
 int CL_DemoAPIRecording()
 {
-	//TODO: implement - Solokiller
-	return false;
+	return (unsigned int)(cls.demorecording != false);
 }
 
 int CL_DemoAPIPlayback()
 {
-	//TODO: implement - Solokiller
-	return false;
+	return (unsigned int)(cls.demoplayback != false);
 }
 
 int CL_DemoAPITimedemo()
 {
-	//TODO: implement - Solokiller
-	return false;
+	return (unsigned int)(cls.timedemo != false);
 }
 
 void CL_WriteClientDLLMessage( int size, byte* buf )
 {
-	//TODO: implement - Solokiller
+	unsigned long localTime;
+	float f;
+	byte cmd;
+
+	if ((CL_DemoAPIRecording() && (cls.demofile != NULL)) && (size > -1)) {
+		cmd = '\t';
+		FS_Write(&cmd, 1, cls.demofile);
+		f = (realtime - cls.demostarttime);
+		FS_Write(&f, 4, cls.demofile);
+		localTime = (host_framecount - cls.demostartframe);
+		FS_Write(&localTime, 4, cls.demofile);
+		FS_Write(&size, 4, cls.demofile);
+		FS_Write(buf, size, cls.demofile);
+	}
+	return;
 }
 
-void CL_WriteDLLUpdate( client_data_t* cdat )
+void CL_WriteDLLUpdate( client_data_t* cdata )
 {
-	//TODO: implement - Solokiller
+	cl_demo_data_t demcmd;
+
+	if (cls.demofile != NULL) {
+		demcmd.cmd = '\x04';
+		demcmd.time = (realtime - cls.demostarttime);
+		demcmd.frame = (host_framecount - cls.demostartframe);
+		demcmd.origin[0] = cdata->origin[0];
+		demcmd.origin[1] = cdata->origin[1];
+		demcmd.origin[2] = cdata->origin[2];
+		demcmd.viewangles[0] = cdata->viewangles[0];
+		demcmd.viewangles[1] = cdata->viewangles[1];
+		demcmd.viewangles[2] = cdata->viewangles[2];
+		demcmd.iWeaponBits = cdata->iWeaponBits;
+		demcmd.fov = cdata->fov;
+		FS_Write(&demcmd, 41, cls.demofile);
+	}
+	return;
 }
 
 void CL_DemoAnim( int anim, int body )
 {
-	//TODO: implement - Solokiller
+	demo_anim_t demcmd;
+
+	if (cls.demofile != NULL) {
+		demcmd.cmd = '\a';
+		demcmd.time = (realtime - cls.demostarttime);
+		demcmd.frame = (host_framecount - cls.demostartframe);
+		demcmd.anim = anim;
+		demcmd.body = body;
+		FS_Write(&demcmd, 17, cls.demofile);
+	}
+	return;
 }
 
 void CL_DemoEvent( int flags, int idx, float delay, event_args_t* pargs )
 {
-	//TODO: implement - Solokiller
+	demo_event_t demcmd;
+
+	if (cls.demofile != NULL) {
+		demcmd.cmd = '\x06';
+		demcmd.time = (realtime - cls.demostarttime);
+		demcmd.frame = (host_framecount - cls.demostartframe);
+		demcmd.flags = flags;
+		demcmd.idx = idx;
+		demcmd.delay = delay;
+		FS_Write(&demcmd, 21, cls.demofile);
+		FS_Write(pargs, 72, cls.demofile);
+	}
+	return;
 }

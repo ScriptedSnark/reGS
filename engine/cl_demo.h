@@ -3,6 +3,8 @@
 
 #include "cdll_int.h"
 #include "demo_api.h"
+#include "client.h"
+#include "common.h"
 
 extern client_textmessage_t tm_demomessage;
 

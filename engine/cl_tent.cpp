@@ -322,7 +322,7 @@ void R_AttachTentToPlayer2(int client, model_s* pModel, float zoffset, float lif
 	int iVar3;
 	vec3_t position;
 
-	if ((-1 < client) && (client <= cl.maxclients)) {
+	if ((client > -1) && (client <= cl.maxclients)) {
 		// TODO: impl - xWhitey
 		if (true /*cl_entit.curstate.messagenum == cl.parsecount*/) { // There's prob should be CL_GetEntityByIndex, but its definition doesn't exist here
 			//position[0] = cl_entities[client].origin[0];             } the same as             ^^^^^^^^^^^^
