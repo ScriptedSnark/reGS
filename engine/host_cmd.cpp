@@ -91,6 +91,24 @@ void Host_ClearSaveDirectory()
 	//TODO: implement - Solokiller
 }
 
+void Host_Maps_f()
+{
+	if (Cmd_Argc() != 2)
+	{
+		Con_Printf("Usage:  maps <substring>\nmaps * for full listing\n");
+	}
+
+	const char* pszSubString = (char*)Cmd_Argv(1);
+
+	if (pszSubString && *pszSubString)
+	{
+		if (*pszSubString == '*')
+			pszSubString = nullptr;
+
+		COM_ListMaps(pszSubString);
+	}
+}
+
 void Host_Quit_f()
 {
 	if( Cmd_Argc() == 1 )
@@ -146,5 +164,6 @@ void Host_InitCommands()
 	Cmd_AddCommand( "_setaddons_folder", Host_SetAddonsFolder_f );
 	Cmd_AddCommand( "_set_vid_level", Host_SetVideoLevel_f );
 	Cmd_AddCommand( "exit", Host_Quit_f );
+	Cmd_AddCommand("maps", Host_Maps_f);
 	//TODO: implement - Solokiller
 }
