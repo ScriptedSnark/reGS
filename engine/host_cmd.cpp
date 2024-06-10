@@ -112,11 +112,36 @@ void Host_Quit_f()
 	}
 }
 
+void Host_Quit_Restart_f()
+{
+	giActive = DLL_STATE_RESTART;
+	giStateInfo = 4;
+
+	/* TODO: implement
+	if ( sv.active
+	|| cls.state == ca_active
+	&& cls.trueaddress[0]
+	&& g_pPostRestartCmdLineArgs
+	&& (strcat(g_pPostRestartCmdLineArgs, " +connect "), strcat(g_pPostRestartCmdLineArgs, cls.servername), sv.active) )
+	{
+		if ( svs.maxclients == 1 && cls.state == ca_active )
+		{
+			if ( g_pPostRestartCmdLineArgs )
+			{
+				Cbuf_AddText("save quick\n");
+				Cbuf_Execute();
+				strcat(g_pPostRestartCmdLineArgs, " +load quick");
+			}
+	}
+	*/
+}
+
 void Host_InitCommands()
 {
 	//TODO: implement - Solokiller
 	Cmd_AddCommand( "quit", Host_Quit_f );
 	//TODO: implement - Solokiller
+	Cmd_AddCommand("_restart", Host_Quit_Restart_f);
 	Cmd_AddCommand( "_sethdmodels", Host_SetHDModels_f );
 	Cmd_AddCommand( "_setaddons_folder", Host_SetAddonsFolder_f );
 	Cmd_AddCommand( "_set_vid_level", Host_SetVideoLevel_f );
