@@ -515,7 +515,7 @@ bool GL_SetMode( SDL_Window* mainwindow, HDC* pmaindc, HGLRC* pbaseRC, const cha
 	{
 		if( VideoMode_IsWindowed() )
 		{
-			Con_Printf( "Setting frequency in windowed mode is unsupported\n" );
+			Con_DPrintf( "Setting frequency in windowed mode is unsupported\n" );
 		}
 		else
 		{
@@ -533,11 +533,11 @@ bool GL_SetMode( SDL_Window* mainwindow, HDC* pmaindc, HGLRC* pbaseRC, const cha
 			target.dmDisplayFrequency = atoi( com_argv[ freqIndex + 1 ] );
 			target.dmFields |= DM_DISPLAYFREQUENCY;
 
-			Con_Printf( "Setting monitor frequency to %d\n", target.dmDisplayFrequency );
+			Con_DPrintf( "Setting monitor frequency to %d\n", target.dmDisplayFrequency );
 
 			if( ChangeDisplaySettingsExA( nullptr, &target, NULL, CDS_FULLSCREEN, nullptr )
 				&& ChangeDisplaySettingsA( &target, CDS_FULLSCREEN ) )
-				Con_Printf( "Frequency %d is not supported by your monitor\n", target.dmDisplayFrequency );
+				Con_DPrintf( "Frequency %d is not supported by your monitor\n", target.dmDisplayFrequency );
 		}
 	}
 #endif
@@ -623,12 +623,12 @@ bool GL_SetMode( SDL_Window* mainwindow, HDC* pmaindc, HGLRC* pbaseRC, const cha
 				qglDeleteTextures( 1, &s_MSAAFBO.s_hBackBufferTex );
 			s_MSAAFBO.s_hBackBufferTex = 0;
 
-			Con_Printf( "Error initializing MSAA frame buffer\n" );
+			Con_DPrintf( "Error initializing MSAA frame buffer\n" );
 		}
 	}
 	else
 	{
-		Con_Printf( "MSAA backbuffer rendering disabled.\n" );
+		Con_DPrintf( "MSAA backbuffer rendering disabled.\n" );
 		s_MSAAFBO.s_hBackBufferFBO = 0;
 	}
 
@@ -682,9 +682,9 @@ bool GL_SetMode( SDL_Window* mainwindow, HDC* pmaindc, HGLRC* pbaseRC, const cha
 		if( !SDL_GetClosestDisplayMode( 0, &requestedMode, &mode ) )
 			Sys_Error( "Error initializing Main frame buffer\n" );
 		if( bDoScaledFBO )
-			Con_Printf( "FBO backbuffer rendering disabled due to create error.\n" );
+			Con_DPrintf( "FBO backbuffer rendering disabled due to create error.\n" );
 		else
-			Con_Printf( "FBO backbuffer rendering disabled.\n" );
+			Con_DPrintf( "FBO backbuffer rendering disabled.\n" );
 		SDL_SetWindowDisplayMode( mainwindow, &mode );
 
 		bNeedsFullScreenModeSwitch = true;
