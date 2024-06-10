@@ -193,7 +193,7 @@ void CheckTextureExtensions()
 		  Q_strstr( gl_extensions, "GL_EXT_shared_texture_palette" ) ) )
 	{
 		qglColorTableEXT = reinterpret_cast<decltype( qglColorTableEXT )>( SDL_GL_GetProcAddress( "glColorTableEXT" ) );
-		Con_Printf( "Found paletted texture extension.\n" );
+		Con_DPrintf( "Found paletted texture extension.\n" );
 	}
 	else
 	{
@@ -233,7 +233,7 @@ void CheckMultiTextureExtensions()
 
 			if( num > 2 )
 			{
-				Con_Printf( "%d texture units.  Detail texture supported.\n", num );
+				Con_DPrintf( "%d texture units.  Detail texture supported.\n", num );
 				gl_mtexable = num;
 				DT_Initialize();
 			}
@@ -241,7 +241,7 @@ void CheckMultiTextureExtensions()
 	}
 	else if( gl_extensions && Q_strstr( gl_extensions, "GL_SGIS_multitexture " ) )
 	{
-		Con_Printf( "Multitexture extensions found.\n" );
+		Con_DPrintf( "Multitexture extensions found.\n" );
 
 		qglMTexCoord2fSGIS = reinterpret_cast<decltype( qglMTexCoord2fSGIS )>( SDL_GL_GetProcAddress( "glMTexCoord2fSGIS" ) );
 		qglSelectTextureSGIS = reinterpret_cast<decltype( qglSelectTextureSGIS )>( SDL_GL_GetProcAddress( "glSelectTextureSGIS" ) );
@@ -256,7 +256,7 @@ void CheckMultiTextureExtensions()
 	}
 	else
 	{
-		Con_Printf( "NO Multitexture extensions found.\n" );
+		Con_DPrintf( "NO Multitexture extensions found.\n" );
 	}
 }
 
