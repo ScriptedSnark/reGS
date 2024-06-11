@@ -29,6 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "host.h"
 #include "pmove.h"
 #include "tmessage.h"
+#include <gl_vidnt.h>
 
 client_static_t cls;
 client_state_t	cl;
@@ -85,6 +86,29 @@ void PrintStartupTimings()
 	}
 }
 
+void CL_TakeSnapshot_f()
+{
+	int i; // ebx
+	FileHandle_t v2; // eax
+	char base[64]; // [esp+20h] [ebp-8Ch] BYREF
+	char filename[64]; // [esp+60h] [ebp-4Ch] BYREF
+
+	Q_strcpy(base, "Snapshot");
+
+	for (i = 0; i != 1000; ++i)
+	{
+		snprintf(filename, 0x40u, "%s%04d.bmp", base, i);
+		v2 = FS_OpenPathID(filename, "r", "GAMECONFIG");
+		if (!v2)
+		{
+			VID_TakeSnapshot(filename);
+			return;
+		}
+		FS_Close(v2);
+	}
+	Con_Printf("Unable to take a screenshot.\n");
+}
+
 void CL_ShutDownClientStatic()
 {
 	//TODO: implement - Solokiller
@@ -102,6 +126,7 @@ void CL_Init()
 	//TODO: implement - Solokiller
 	TextMessageInit();
 	//TODO: implement - Solokiller
+	Cmd_AddCommand("snapshot", CL_TakeSnapshot_f);
 	Cvar_RegisterVariable( &rate );
 	Cvar_RegisterVariable( &cl_lw );
 	Cvar_RegisterVariable( &dev_overview );
