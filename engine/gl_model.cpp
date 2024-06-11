@@ -54,3 +54,73 @@ void Mod_ClearAll()
 {
 	//TODO: implement - Solokiller
 }
+
+byte* Mod_DecompressVis(byte* in, model_t* model)
+{
+	// #define MAX_MAP_LEAFS 32767
+	// i just copypasted this thing from quake - xWhitey
+	static byte	decompressed[32767 / 8];
+	int		c;
+	byte* out;
+	int		row;
+
+	row = (model->numleafs + 7) >> 3;
+	out = decompressed;
+
+#if 0
+	memcpy(out, in, row);
+#else
+	if (!in)
+	{	// no vis info, so make all visible
+		while (row)
+		{
+			*out++ = 0xff;
+			row--;
+		}
+		return decompressed;
+	}
+
+	do
+	{
+		if (*in)
+		{
+			*out++ = *in++;
+			continue;
+		}
+
+		c = in[1];
+		in += 2;
+		while (c)
+		{
+			*out++ = 0;
+			c--;
+		}
+	} while (out - decompressed < row);
+#endif
+
+	return decompressed;
+}
+
+void Mod_UnloadSpriteTextures(model_t* pModel)
+{
+	void* pvVar1;
+	int param4;
+	int iVar2;
+	char name[256];
+
+	if (pModel->type == mod_sprite) {
+		pvVar1 = (pModel->cache).data;
+		pModel->needload = true;
+		if ((pvVar1 != (void*)0x0) && (0 < *(int*)((int)pvVar1 + 0xc))) {
+			param4 = 0;
+			do {
+				iVar2 = param4 + 1;
+				snprintf(name, 0x100, "%s_%i", pModel->name, param4);
+				// TODO: impl - xWhitey
+				//GL_UnloadTexture(name);
+				param4 = iVar2;
+			} while (*(int*)((int)pvVar1 + 0xc) != iVar2 && iVar2 <= *(int*)((int)pvVar1 + 0xc));
+		}
+	}
+	return;
+}
