@@ -6,14 +6,11 @@
 #include <vgui_controls/QueryBox.h>
 
 #include "BackgroundMenuButton.h"
-#include "CareerGame.h"
-#include "CareerProfileFrame.h"
 #include "CreateMultiplayerGameDialog.h"
 #include "EngineInterface.h"
 #include "GameUI_Interface.h"
 #include "LoadGameDialog.h"
 #include "ModInfo.h"
-#include "MusicManager.h"
 #include "NewGameDialog.h"
 #include "OptionsDialog.h"
 #include "PlayerListDialog.h"
@@ -117,9 +114,6 @@ void CGameMenu::OnThink()
 {
 	BaseClass::OnThink();
 
-	if( TheCareerGame )
-		TheCareerGame->Update();
-
 	if( m_bRestartListUpdate )
 	{
 		m_bUpdatingList = true;
@@ -192,28 +186,6 @@ int CGameMenu::AddMenuItem( const char* itemName, const char* itemText, KeyValue
 	return BaseClass::AddMenuItem( item );
 }
 
-CareerQueryBox::CareerQueryBox( const char* title, const char* queryText, vgui2::Panel* parent )
-	: BaseClass( title, queryText, parent )
-{
-}
-
-CareerQueryBox::~CareerQueryBox()
-{
-}
-
-void CareerQueryBox::ApplySchemeSettings( vgui2::IScheme* pScheme )
-{
-	BaseClass::ApplySchemeSettings( pScheme );
-
-	m_pOkButton->SetArmedSound( "sound/UI/buttonrollover.wav" );
-	m_pOkButton->SetDepressedSound( "sound/UI/buttonclick.wav" );
-	m_pOkButton->SetReleasedSound( "sound/UI/buttonclickrelease.wav" );
-
-	m_pCancelButton->SetArmedSound( "sound/UI/buttonrollover.wav" );
-	m_pCancelButton->SetDepressedSound( "sound/UI/buttonclick.wav" );
-	m_pCancelButton->SetReleasedSound( "sound/UI/buttonclickrelease.wav" );
-}
-
 CTaskbar::CTaskbar( vgui2::Panel* parent, const char* panelName )
 	: BaseClass( parent, panelName )
 {
@@ -235,14 +207,11 @@ CTaskbar::CTaskbar( vgui2::Panel* parent, const char* panelName )
 	m_pPlatformMenu = nullptr;
 	m_pGameMenu = nullptr;
 
-	CreateMusicManager();
-
 	CreateGameMenu();
 }
 
 CTaskbar::~CTaskbar()
 {
-	ShutdownMusicManager();
 }
 
 void CTaskbar::OnActivateModule(int moduleIndex )
@@ -278,29 +247,6 @@ void CTaskbar::ApplySchemeSettings( vgui2::IScheme* pScheme )
 	SetBgColor( GetSchemeColor( "InGameDesktop/WidescreenBarColor", pScheme ) );
 
 	InvalidateLayout();
-}
-
-void CTaskbar::OnOpenNewCareerNameDialog()
-{
-	if( TheCareerGame && TheCareerGame->IsPlayingMatch() )
-	{
-		auto pQuery = new CareerQueryBox( "#Career_RestartConfirmationTitle", "#Career_RestartConfirmationText", this );
-
-		pQuery->SetOKButtonText( "#Career_Restart" );
-		pQuery->SetOKCommand( new KeyValues( "Command", "command", "RestartCareer" ) );
-		pQuery->SetCancelCommand( new KeyValues( "Command", "command", "ReleaseModalWindow" ) );
-
-		pQuery->AddActionSignalTarget( this );
-
-		pQuery->DoModal();
-
-		vgui2::surface()->RestrictPaintToSinglePanel( pQuery->GetVPanel() );
-	}
-	else
-	{
-		engine->pfnClientCmd( "disconnect\n" );
-		OnOpenCareerProfileFrame();
-	}
 }
 
 void CTaskbar::RunFrame()
@@ -365,30 +311,6 @@ void CTaskbar::OnOpenPlayerListDialog()
 	m_hPlayerListDialog->Activate();
 }
 
-void CTaskbar::OnOpenCareerBotDialog()
-{
-	if( !m_hCareerBotDialog )
-	{
-		//TODO: implement - Solokiller
-		//m_hCareerBotDialog = new CCareerBotFrame( this );
-		PositionDialog( m_hCareerBotDialog );
-	}
-	
-	m_hCareerBotDialog->Activate();
-}
-
-void CTaskbar::OnOpenCareerMapDialog( bool promptOnOverwrite )
-{
-	if( !m_hCareerMapDialog )
-	{
-		//TODO: implement - Solokiller
-		//m_hCareerMapDialog = new CCareerMapFrame( this );
-		PositionDialog( m_hCareerMapDialog );
-	}
-	
-	m_hCareerMapDialog->Activate();
-}
-
 void CTaskbar::OnOpenCreateMultiplayerGameDialog()
 {
 	if( !m_hCreateMultiplayerGameDialog )
@@ -449,63 +371,6 @@ void CTaskbar::OnOpenNewGameDialog()
 	m_hNewGameDialog->Activate();
 }
 
-vgui2::Frame* CTaskbar::OnOpenResumeCareerGameDialog( CareerDifficultyType difficulty )
-{
-	CCareerGame::Create();
-	TheCareerGame->Reset();
-
-	if( TheCareerGame->LoadProfile( difficulty ) )
-	{
-		if( !m_hCareerMapDialog )
-		{
-			//TODO: implement - Solokiller
-			//m_hCareerMapDialog = new CCareerMapFrame( this );
-			PositionDialog( m_hCareerMapDialog );
-		}
-		
-		m_hCareerMapDialog->Activate();
-	}
-
-	return m_hCareerMapDialog;
-}
-
-void CTaskbar::OnOpenCareerProfileFrame()
-{
-	if( m_hCareerDifficultyDialog )
-	{
-		m_hCareerDifficultyDialog->Close();
-	}
-
-	if( !m_hCareerProfileDialog )
-	{
-		m_hCareerProfileDialog = new CCareerProfileFrame( this );
-		PositionDialog( m_hCareerProfileDialog );
-	}
-
-	m_hCareerProfileDialog->Activate();
-}
-
-void CTaskbar::OnOpenCreateCareerGameDialog()
-{
-	if( TheCareerGame && TheCareerGame->IsPlayingMatch() )
-	{
-		auto pQuery = new CareerQueryBox( "#Career_RestartConfirmationTitle", "#Career_RestartConfirmationText", this );
-		pQuery->SetOKButtonText( "#Career_Restart" );
-		pQuery->SetOKCommand( new KeyValues( "Command", "command", "RestartCareer" ) );
-		pQuery->SetCancelCommand( new KeyValues( "Command", "command", "ReleaseModalWindow" ) );
-
-		pQuery->AddActionSignalTarget( this );
-		pQuery->DoModal();
-		vgui2::surface()->RestrictPaintToSinglePanel( pQuery->GetVPanel() );
-	}
-	else
-	{
-		CCareerGame::Create();
-		TheCareerGame->Reset();
-		OnOpenCareerProfileFrame();
-	}
-}
-
 void CTaskbar::OnCommand( const char* command )
 {
 	if( !stricmp( command, "OpenGameMenu" ) )
@@ -554,22 +419,6 @@ void CTaskbar::OnCommand( const char* command )
 	{
 		OnOpenCreateMultiplayerGameDialog();
 	}
-	else if( !stricmp( command, "OpenNewCareerNameDialog" ) )
-	{
-		if( !stricmp( ModInfo().GetGameDescription(), "Condition Zero" ) )
-		{
-			if( TheCareerGame
-				&& TheCareerGame->IsPlayingMatch() )
-			{
-				OnOpenNewCareerNameDialog();
-			}
-			else
-			{
-				engine->pfnClientCmd( "disconnect\n" );
-				OnOpenCareerProfileFrame();
-			}
-		}
-	}
 	else if( !stricmp( command, "OpenPlayOnLineDialog" ) )
 	{
 		auto pQuery = new vgui2::QueryBox( "#CZero_PlayOnLine", "#CZero_PlayOnLineText" );
@@ -577,21 +426,6 @@ void CTaskbar::OnCommand( const char* command )
 		pQuery->SetOKCommand( new KeyValues( "Command", "command", "QuitToPlayOnLine" ) );
 
 		pQuery->DoModal();
-	}
-	else if( !strnicmp( command, "OpenCareerMapDialog", 19 ) )
-	{
-		if( !stricmp( ModInfo().GetGameDescription(), "Condition Zero" ) )
-			OnOpenCareerMapDialog( false );
-	}
-	else if( !stricmp( command, "OpenCareerBotDialog" ) )
-	{
-		if( !stricmp( ModInfo().GetGameDescription(), "Condition Zero" ) )
-			OnOpenCareerBotDialog();
-	}
-	else if( !stricmp( command, "OpenCreateCareerGameDialog" ) )
-	{
-		if( !stricmp( ModInfo().GetGameDescription(), "Condition Zero" ) )
-			OnOpenCreateCareerGameDialog();
 	}
 	else if( !stricmp( command, "OpenChangeGameDialog" ) )
 	{
@@ -603,71 +437,23 @@ void CTaskbar::OnCommand( const char* command )
 	}
 	else if( !stricmp( command, "QuitNoConfirm" ) )
 	{
-		if( TheCareerGame && TheCareerGame->IsPlayingMatch() )
-			TheCareerGame->StopMatch( 0, 0 );
-
 		engine->pfnClientCmd( "quit\n" );
 
 		SetVisible( false );
 		vgui2::surface()->RestrictPaintToSinglePanel( GetVPanel() );
-	}
-	else if( !stricmp( command, "QuitToPlayOnLine" ) )
-	{
-		if( TheCareerGame && TheCareerGame->IsPlayingMatch() )
-			TheCareerGame->StopMatch( 0, 0 );
-
-		engine->pfnClientCmd( "quit\n" );
-
-		SetVisible( false );
-
-		vgui2::surface()->RestrictPaintToSinglePanel( GetVPanel() );
-
-		vgui2::system()->ShellExecute( "open", "steaminstall.exe" );
 	}
 	else if( !stricmp( command, "ResumeGame" ) )
 	{
 		if( baseuifuncs )
 			baseuifuncs->HideGameUI();
 	}
-	else if( !stricmp( command, "ReallySurrender" ) )
-	{
-		engine->pfnClientCmd( "disconnect\n" );
-		TheCareerGame->OnRoundEndMenuClose( false );
-	}
 	else if( !stricmp( command, "Disconnect" ) )
 	{
 		engine->pfnClientCmd( "disconnect\n" );
 	}
-	else if( !stricmp( command, "RestartCareer" ) )
+	else if (!stricmp(command, "ReleaseModalWindow"))
 	{
-		TheCareerGame->StopMatch( 0, 0 );
-		vgui2::surface()->RestrictPaintToSinglePanel( NULL_HANDLE );
-		engine->pfnClientCmd( "disconnect\n" );
-		OnOpenNewCareerNameDialog();
-	}
-	else if( !stricmp( command, "ReleaseModalWindow" ) )
-	{
-		vgui2::surface()->RestrictPaintToSinglePanel( NULL_HANDLE );
-	}
-	else if( !stricmp( command, "Surrender" ) )
-	{
-		auto pQuery = new vgui2::QueryBox( "#Career_Surrender", "#GameUI_QuitConfirmationText", this );
-		pQuery->SetProportional( false );
-		pQuery->SetOKCommand( new KeyValues( "Command", "command", "ReallySurrender" ) );
-		pQuery->AddActionSignalTarget( this );
-		pQuery->SetScheme( "TrackerScheme" );
-
-		pQuery->DoModal();
-	}
-	else if( !stricmp( command, "EndRound" ) )
-	{
-		auto pQuery = new vgui2::QueryBox( "#Career_EndRound", "#Career_EndRoundText", this );
-		pQuery->SetProportional( false );
-		pQuery->SetOKCommand( new KeyValues( "Command", "command", "engine career_endround\n" ) );
-		pQuery->AddActionSignalTarget( this );
-		pQuery->SetScheme( "TrackerScheme" );
-
-		pQuery->DoModal();
+		vgui2::surface()->RestrictPaintToSinglePanel(NULL_HANDLE);
 	}
 	else
 	{
@@ -732,15 +518,6 @@ void CTaskbar::UpdateGameMenus()
 		m_pPlatformMenu->SetVisible( true );
 	}
 
-	static bool isInCareerGame = false;
-
-	if( isInCareerGame
-		&& !TheCareerGame->IsPlayingMatch() )
-	{
-		TheCareerGame->StopMatch( 0, 0 );
-		isInCareerGame = false;
-	}
-
 	bool isInGame;
 	bool isMulti;
 	
@@ -748,53 +525,20 @@ void CTaskbar::UpdateGameMenus()
 
 	if( pszLevelName && *pszLevelName )
 	{
+		isInGame = true;
 		if( engine->GetMaxClients() <= 1 )
 		{
 			isMulti = false;
-			isInGame = true;
-		}
-		else if( TheCareerGame
-				 && TheCareerGame->IsPlayingMatch() )
-		{
-			isInCareerGame = true;
-			isMulti = true;
-			isInGame = true;
 		}
 		else
 		{
 			isMulti = true;
-			isInGame = true;
 		}
 	}
 	else
 	{
 		isMulti = false;
 		isInGame = false;
-	}
-
-	if( TheMusicManager )
-	{
-		if( ( g_hLoadingDialog ||
-			  isInGame ||
-			  TheMusicManager->IsPlayingTrack( TRACKTYPE_SPLASH ) )
-			&& ( !g_hLoadingDialog ||
-				 isInGame ||
-				 !isInCareerGame ||
-				 TheMusicManager->IsPlayingTrack( TRACKTYPE_SPLASH ) ) )
-		{
-			if( g_hLoadingDialog &&
-				!isInCareerGame &&
-				TheMusicManager->IsPlayingTrack( TRACKTYPE_SPLASH ) ||
-				isInGame &&
-				TheMusicManager->IsPlayingTrack( TRACKTYPE_SPLASH ) )
-			{
-				TheMusicManager->FadeOutTrack();
-			}
-		}
-		else
-		{
-			TheMusicManager->StartTrack( TRACKTYPE_SPLASH, true );
-		}
 	}
 
 	const auto bIsSteam = engine->CheckParm( "-steam", 0 ) != 0;
@@ -817,14 +561,7 @@ void CTaskbar::UpdateGameMenus()
 		if( !pData )
 			continue;
 
-		bool bAvailable;
-
-		if( isInGame )
-		{
-			bAvailable = pData->GetInt( isInCareerGame ? "NotInCareerGame" : "OnlyInCareerGame", 0 ) != 0;
-		}
-		else
-			bAvailable = pData->GetInt( "OnlyInGame", 0 ) == 0;
+		bool bAvailable = true;
 
 		if( isMulti && pData->GetInt( "notmulti", 0 ) )
 		{

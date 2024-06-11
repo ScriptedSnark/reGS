@@ -8,27 +8,6 @@
 
 class CBitmapImagePanel;
 
-class CareerRichText : public vgui2::RichText
-{
-public:
-	using BaseClass = vgui2::RichText;
-
-	CareerRichText( vgui2::Panel* parent );
-	~CareerRichText();
-
-	void ApplySchemeSettings( vgui2::IScheme* pScheme ) override;
-
-	void PerformLayout() override;
-
-private:
-	int m_fontHeight = 0;
-	bool m_addedScrollbar = false;
-
-private:
-	CareerRichText( const CareerRichText& ) = delete;
-	CareerRichText& operator=( const CareerRichText& ) = delete;
-};
-
 class CLoadingDialog : public vgui2::Frame
 {
 public:
@@ -72,10 +51,6 @@ public:
 
 	void SwitchToHttpDownloadDialog();
 
-	void SwitchToPausedCareerDialog();
-
-	void CompleteSwitchToPausedCareerDialog();
-
 	void OnThink() override;
 
 private:
@@ -86,13 +61,6 @@ private:
 	vgui2::Label* m_pTimeRemainingLabel;
 
 	vgui2::Button* m_pCancelButton;
-
-	CareerRichText* m_pCareerMapDescLabel;
-
-	vgui2::Label* m_pCareerMapLabel;
-	vgui2::Label* m_pCareerScenarioInfo;
-
-	CBitmapImagePanel* m_pCareerMapImagePanel;
 
 	float m_switchTime = 0;
 

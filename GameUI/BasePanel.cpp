@@ -34,9 +34,7 @@ void CBasePanel::PaintBackground()
 	auto pszLevelName = engine->pfnGetLevelName();
 
 	//Draw transparently if a level is loaded.
-	//But not if we're in a career match.
-	if( pszLevelName && *pszLevelName &&
-		m_eBackgroundState != BACKGROUND_CAREERLOAD )
+	if( pszLevelName && *pszLevelName )
 	{
 		int swide, stall;
 		vgui2::surface()->GetScreenSize( swide, stall );
@@ -48,7 +46,6 @@ void CBasePanel::PaintBackground()
 		switch( m_eBackgroundState )
 		{
 		case BACKGROUND_BLACK:
-		case BACKGROUND_CAREERLOAD:
 			{
 				//Draw black screen if loading a career match.
 				int swide, stall;

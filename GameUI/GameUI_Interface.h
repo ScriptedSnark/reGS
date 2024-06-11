@@ -73,8 +73,6 @@ public:
 
 	void OnDisconnectFromServer( int eSteamLoginFailure, const char* username ) override;
 
-	void FinishCareerLoad();
-
 	void RunVguiTestScript( const char* script );
 
 private:

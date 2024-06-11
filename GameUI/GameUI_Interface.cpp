@@ -16,7 +16,6 @@
 #include "interface.h"
 
 #include "BasePanel.h"
-#include "CareerGame.h"
 #include "EngineInterface.h"
 #include "GameUI_Interface.h"
 #include "ienginevgui.h"
@@ -371,26 +370,10 @@ void CGameUI::RunFrame()
 
 void CGameUI::ConnectToServer( const char* game, int IP, int port )
 {
-	if( TheCareerGame && TheCareerGame->IsPlayingMatch() )
-	{
-		baseuifuncs->ActivateGameUI();
+	if( stricmp( game, "valve" ) )
+		engine->pfnClientCmd( "mp3 stop\n" );
 
-		StartProgressBar( "CareerPause", 1 );
-		staticPanel->SetBackgroundRenderState( CBasePanel::BACKGROUND_CAREERLOAD );
-		ContinueProgressBar( 1, 100 );
-
-		SetProgressBarStatusText( "#Career_Start" );
-
-		LoadingDialog()->SwitchToPausedCareerDialog();
-		TheCareerGame->FinishMatchStart();
-	}
-	else
-	{
-		if( stricmp( game, "valve" ) )
-			engine->pfnClientCmd( "mp3 stop\n" );
-
-		baseuifuncs->HideGameUI();
-	}
+	baseuifuncs->HideGameUI();
 
 	m_iGameIP = IP;
 	m_iGamePort = port;
@@ -421,13 +404,7 @@ void CGameUI::HideGameUI()
 		staticPanel->SetVisible( false );
 		g_pTaskbar->SetVisible( false );
 
-		if( !TheCareerGame ||
-			!TheCareerGame->IsPlayingMatch() ||
-			TheCareerGame->m_canUnpause )
-		{
-			engine->pfnClientCmd( "unpause" );
-		}
-
+		engine->pfnClientCmd( "unpause" );
 		engine->pfnClientCmd( "hideconsole" );
 	}
 }
@@ -613,14 +590,6 @@ bool CGameUI::FindPlatformDirectory( char* platformDir, int bufferSize )
 {
 	strncpy( platformDir, "platform", bufferSize );
 	return true;
-}
-
-void CGameUI::FinishCareerLoad()
-{
-	engine->pfnClientCmd( "mp3 stop\n" );
-	engine->pfnClientCmd( "_careeraudio\n" );
-	baseuifuncs->HideGameUI();
-	staticPanel->SetBackgroundRenderState( CBasePanel::BACKGROUND_DESKTOPIMAGE );
 }
 
 void CGameUI::RunVguiTestScript( const char* script )

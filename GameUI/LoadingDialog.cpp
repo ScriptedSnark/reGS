@@ -8,8 +8,6 @@
 #include <vgui_controls/ProgressBar.h>
 
 #include "BitmapImagePanel.h"
-#include "CareerGame.h"
-#include "CareerMapFrame.h"
 #include "EngineInterface.h"
 #include "GameUI_Interface.h"
 #include "igameuifuncs.h"
@@ -19,38 +17,6 @@
 CLoadingDialog* LoadingDialog()
 {
 	return static_cast<CLoadingDialog*>(g_hLoadingDialog.Get() );
-}
-
-CareerRichText::CareerRichText( vgui2::Panel* parent )
-	: BaseClass( parent, "CareerInfo" )
-{
-}
-
-CareerRichText::~CareerRichText()
-{
-}
-
-void CareerRichText::ApplySchemeSettings( vgui2::IScheme* pScheme )
-{
-	BaseClass::ApplySchemeSettings( pScheme );
-
-	m_addedScrollbar = false;
-	m_fontHeight = vgui2::surface()->GetFontTall( pScheme->GetFont( "Default", IsProportional() ) );
-}
-
-void CareerRichText::PerformLayout()
-{
-	BaseClass::PerformLayout();
-
-	int wide, tall;
-	GetSize( wide, tall );
-
-	if( ( m_fontHeight + 1 ) * GetNumLines() + 3 > tall && !m_addedScrollbar )
-	{
-		SetVerticalScrollbar( true );
-		m_addedScrollbar = true;
-		InsertString( L"" );
-	}
 }
 
 CLoadingDialog::CLoadingDialog( vgui2::Panel* parent )
@@ -67,8 +33,6 @@ CLoadingDialog::CLoadingDialog( vgui2::Panel* parent )
 
 	m_pCancelButton->SetCommand( "Cancel" );
 
-	m_pCareerMapDescLabel = nullptr;
-
 	m_pInfoLabel->SetBounds( 20, 32, 392, 24 );
 	m_pProgress->SetBounds( 20, 64, 300, 24 );
 	m_pCancelButton->SetBounds( 330, 64, 72, 24 );
@@ -83,73 +47,7 @@ CLoadingDialog::CLoadingDialog( vgui2::Panel* parent )
 
 	m_pProgress2->SetVisible( false );
 
-	if( TheCareerGame && TheCareerGame->IsPlayingMatch() )
-	{
-		m_pCareerMapDescLabel = new CareerRichText( this );
-		m_isCareerLoadingDialog = true;
-
-		//TODO: should be MAX_PATH - Solokiller
-		char buf[ 128 ];
-
-		snprintf( buf, ARRAYSIZE( buf ), "gfx/thumbnails/maps/%s", TheCareerGame->GetLastMap() );
-
-		m_pCareerMapImagePanel = new CBitmapImagePanel( this, "CareerMapImage", nullptr );
-		m_pCareerMapImagePanel->AddActionSignalTarget( this );
-		m_pCareerMapImagePanel->setTexture( buf );
-
-		m_pCareerMapLabel = new vgui2::Label( this, "CareerMapTitle", "" );
-
-		snprintf( buf, ARRAYSIZE( buf ), "#Career_Map_%s", TheCareerGame->GetLastMap() );
-
-		if( !vgui2::localize()->Find( buf ) )
-		{
-			snprintf( buf, ARRAYSIZE( buf ), "%s", TheCareerGame->GetLastMap() );
-		}
-
-		m_pCareerMapLabel->SetText( buf );
-
-		m_pCareerScenarioInfo = new vgui2::Label( this, "CareerScenarioInfo", "" );
-
-		if( TheCareerGame->PlayAsCT() )
-		{
-			if( !strncmp( "de_", TheCareerGame->GetLastMap(), 3 ) )
-			{
-				m_pCareerScenarioInfo->SetText( "#Career_BombDefusalCT" );
-			}
-			else
-			{
-				m_pCareerScenarioInfo->SetText( "#Career_HostageRescueCT" );
-			}
-		}
-		else
-		{
-			if( !strncmp( "de_", TheCareerGame->GetLastMap(), 3 ) )
-			{
-				m_pCareerScenarioInfo->SetText( "#Career_BombDefusalT" );
-			}
-			else
-			{
-				m_pCareerScenarioInfo->SetText( "#Career_HostageRescueT" );
-			}
-		}
-
-		auto pScheme = vgui2::scheme()->GetIScheme( GetScheme() );
-
-		//TODO: verify that these colors are correct - Solokiller
-		auto normalColor = pScheme->GetColor( "ControlText", SDK_Color( 255, 255, 255, 255 ) );
-		auto friendlyFireColor = pScheme->GetColor( "BrightControlText", SDK_Color( 255, 255, 255, 255 ) );
-
-		ShowCareerMapDescription(
-			m_pCareerMapDescLabel,
-			TheCareerGame->GetLastMapPtr(),
-			normalColor,
-			friendlyFireColor
-		);
-
-		LoadControlSettings( "Resource/CareerLoadingDialog.res" );
-		m_pCareerMapDescLabel->SetVerticalScrollbar( false );
-	}
-	else if( engine->CheckParm( "-steam", nullptr ) || engine->CheckParm( "-showplatform", nullptr ) )
+	if( engine->CheckParm( "-steam", nullptr ) || engine->CheckParm( "-showplatform", nullptr ) )
 	{
 		if( gameuifuncs->IsConnectedToVACSecureServer() )
 		{
@@ -177,11 +75,6 @@ CLoadingDialog::~CLoadingDialog()
 void CLoadingDialog::ApplySchemeSettings( vgui2::IScheme* pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
-
-	if( m_pCareerMapImagePanel )
-	{
-		m_pCareerMapImagePanel->SetBorder( pScheme->GetBorder( "InsetBorder" ) );
-	}
 }
 
 void CLoadingDialog::OnClose()
@@ -215,21 +108,9 @@ void CLoadingDialog::OnCommand( const char* command )
 		}
 		else
 		{
-			if( TheCareerGame &&
-				TheCareerGame->IsPlayingMatch() &&
-				!m_pProgress->IsVisible() )
-			{
-				GameUI().FinishCareerLoad();
-			}
-
 			engine->pfnClientCmd( "disconnect\n" );
 		}
 		
-		Close();
-	}
-	else if( !stricmp( command, "StartCareer" ) )
-	{
-		GameUI().FinishCareerLoad();
 		Close();
 	}
 	else
@@ -276,14 +157,6 @@ void CLoadingDialog::SetupControlSettingsForErrorDisplay( const char* settingsFi
 
 	m_pInfoLabel->SetText( "" );
 	m_pCancelButton->SetEnabled( false );
-
-	if( m_pCareerMapDescLabel )
-	{
-		m_pCareerMapDescLabel->SetVisible( false );
-		m_pCareerMapLabel->SetVisible( false );
-		m_pCareerScenarioInfo->SetVisible( false );
-		m_pCareerMapImagePanel->SetVisible( false );
-	}
 }
 
 void CLoadingDialog::DisplayGenericError( const char* failureReason, const char* extendedReason )
@@ -453,50 +326,6 @@ void CLoadingDialog::SwitchToHttpDownloadDialog()
 	LoadControlSettings( "Resource/LoadingDialog.res" );
 }
 
-void CLoadingDialog::SwitchToPausedCareerDialog()
-{
-	if( m_isCareerLoadingDialog )
-	{
-		m_switchTime = vgui2::system()->GetFrameTime() + 1.5;
-	}
-	else
-	{
-		GameUI().FinishCareerLoad();
-		Close();
-	}
-}
-
-void CLoadingDialog::CompleteSwitchToPausedCareerDialog()
-{
-	if( m_isCareerLoadingDialog )
-	{
-		m_switchTime = 0;
-
-		m_pCancelButton->SetText( "#Career_Start" );
-		m_pCancelButton->SetCommand( "StartCareer" );
-
-		int bX, bY, bW, bH;
-		m_pCancelButton->GetBounds( bX, bY, bW, bH );
-
-		int pX, pY, pW, pH;
-		m_pProgress->GetBounds( pX, pY, pW, pH );
-
-		int iX, iY, iW, iH;
-		m_pInfoLabel->GetBounds( iX, iY, iW, iH );
-
-		int wide = GetWide();
-		bX = wide / 2 - bW;
-		bY = iY + ( pH + pY - iY ) / 2 - bH / 2;
-
-		m_pProgress->SetVisible( false );
-		m_pInfoLabel->SetVisible( false );
-
-		m_pCancelButton->SetBounds( bX, bY, 2 * bW, bH );
-		m_pCancelButton->SetContentAlignment( vgui2::Label::a_center );
-		m_pCancelButton->SetEnabled( true );
-	}
-}
-
 void CLoadingDialog::OnThink()
 {
 	BaseClass::OnThink();
@@ -527,10 +356,5 @@ void CLoadingDialog::OnThink()
 				m_pTimeRemainingLabel->SetText( "" );
 			}
 		}
-	}
-
-	if( m_switchTime && m_switchTime < vgui2::system()->GetFrameTime() )
-	{
-		CompleteSwitchToPausedCareerDialog();
 	}
 }

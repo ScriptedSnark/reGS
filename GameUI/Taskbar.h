@@ -9,8 +9,6 @@
 #include <vgui_controls/PHandle.h>
 #include <vgui_controls/QueryBox.h>
 
-#include "GameUI/CareerDefs.h"
-
 class CBackgroundMenuButton;
 class CTaskButton;
 
@@ -70,21 +68,6 @@ private:
 	CGameMenu& operator=( const CGameMenu& ) = delete;
 };
 
-class CareerQueryBox : public vgui2::QueryBox
-{
-public:
-	using BaseClass = vgui2::QueryBox;
-
-	CareerQueryBox( const char* title, const char* queryText, vgui2::Panel* parent );
-	~CareerQueryBox();
-
-	void ApplySchemeSettings( vgui2::IScheme* pScheme ) override;
-
-private:
-	CareerQueryBox( const CareerQueryBox& ) = delete;
-	CareerQueryBox& operator=( const CareerQueryBox& ) = delete;
-};
-
 class CTaskbar : public vgui2::EditablePanel
 {
 	DECLARE_CLASS_SIMPLE( CTaskbar, vgui2::EditablePanel );
@@ -113,10 +96,6 @@ public:
 
 	void OnOpenPlayerListDialog();
 
-	void OnOpenCareerBotDialog();
-
-	void OnOpenCareerMapDialog( bool promptOnOverwrite );
-
 	void OnOpenCreateMultiplayerGameDialog();
 
 	void OnOpenDemoDialog();
@@ -128,12 +107,6 @@ public:
 	void OnOpenLoadGameDialog();
 
 	void OnOpenNewGameDialog();
-
-	vgui2::Frame* OnOpenResumeCareerGameDialog( CareerDifficultyType difficulty );
-
-	void OnOpenCareerProfileFrame();
-
-	void OnOpenCreateCareerGameDialog();
 
 	void OnCommand( const char* command ) override;
 
@@ -176,10 +149,6 @@ private:
 	vgui2::DHANDLE<vgui2::Frame> m_hDemoPlayerDialog;
 	vgui2::DHANDLE<vgui2::Frame> m_hChangeGameDialog;
 	vgui2::DHANDLE<vgui2::Frame> m_hPlayerListDialog;
-	vgui2::DHANDLE<vgui2::Frame> m_hCareerProfileDialog;
-	vgui2::DHANDLE<vgui2::Frame> m_hCareerDifficultyDialog;
-	vgui2::DHANDLE<vgui2::Frame> m_hCareerMapDialog;
-	vgui2::DHANDLE<vgui2::Frame> m_hCareerBotDialog;
 
 	CUtlVector<CTaskButton*> g_Tasks;
 

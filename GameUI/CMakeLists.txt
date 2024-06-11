@@ -25,8 +25,6 @@ add_sources(
 	${SRC_DIR}/common/Random.cpp
 	${SRC_DIR}/common/Random.h
 	${SRC_DIR}/cstrike/dlls/weapontype.h
-	${SRC_DIR}/game_shared/bot/bot_profile.cpp
-	${SRC_DIR}/game_shared/bot/bot_profile.h
 	${SRC_DIR}/game_shared/shared_util.cpp
 	${SRC_DIR}/game_shared/shared_util.h
 	${SRC_DIR}/game_shared/simple_checksum.h
@@ -43,20 +41,6 @@ add_sources(
 	BitmapButton.h
 	BitmapImagePanel.cpp
 	BitmapImagePanel.h
-	CareerBaseFrame.cpp
-	CareerBaseFrame.h
-	CareerBox.cpp
-	CareerBox.h
-	CareerGame.cpp
-	CareerGame.h
-	CareerGameTasks.cpp
-	CareerGameTasks.h
-	CareerMapFrame.cpp
-	CareerMapFrame.h
-	CareerProfile.cpp
-	CareerProfile.h
-	CareerProfileFrame.cpp
-	CareerProfileFrame.h
 	CDKeyEntryDialog.cpp
 	CDKeyEntryDialog.h
 	CommandCheckButton.cpp
@@ -110,8 +94,6 @@ add_sources(
 	ModInfo.h
 	MultiplayerAdvancedDialog.cpp
 	MultiplayerAdvancedDialog.h
-	MusicManager.cpp
-	MusicManager.h
 	NewGameDialog.cpp
 	NewGameDialog.h
 	OptionsDialog.cpp
