@@ -1,6 +1,7 @@
 #include "quakedef.h"
 #include "client.h"
 #include "cl_tent.h"
+#include <cl_main.h>
 
 static TEMPENTITY gTempEnts[ MAX_TEMP_ENTITIES ];
 

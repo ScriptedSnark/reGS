@@ -2,6 +2,85 @@
 #include "cl_demo.h"
 
 char gDemoMessageBuffer[ 512 ] = {};
+int host_framecount;
+
+#pragma pack(push, 1)
+
+struct demo_anim_t
+{
+	byte cmd;
+	float time;
+	int frame;
+	int anim;
+	int body;
+};
+
+struct demo_command_t
+{
+	byte cmd;
+	float time;
+	int frame;
+};
+
+struct demo_event_t
+{
+	byte cmd;
+	float time;
+	int frame;
+	int flags;
+	int idx;
+	float delay;
+};
+
+struct demo_sound1_t
+{
+	byte cmd;
+	float time;
+	int frame;
+	int channel;
+	int length;
+};
+
+struct hud_command_t
+{
+	byte cmd;
+	float time;
+	int frame;
+	char szNameBuf[64];
+};
+
+struct cl_demo_data_t
+{
+	byte cmd;
+	float time;
+	int frame;
+	vec3_t origin;
+	vec3_t viewangles;
+	int iWeaponBits;
+	float fov;
+};
+
+#pragma pack(pop)
+
+struct demo_sound2_t
+{
+	float volume;
+	float attenuation;
+	int flags;
+	int pitch;
+};
+
+struct sequence_info_t
+{
+	int incoming_sequence;
+	int incoming_acknowledged;
+	int incoming_reliable_acknowledged;
+	int incoming_reliable_sequence;
+	int outgoing_sequence;
+	int reliable_sequence;
+	int last_reliable_sequence;
+	int length;
+};
 
 client_textmessage_t tm_demomessage =
 {
