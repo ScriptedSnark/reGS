@@ -58,41 +58,27 @@ void SPR_Init()
 
 void SPR_Shutdown()
 {
-	model_t** ppmVar1;
-	SPRITELIST* __ptr;
-	int iVar2;
-	int iVar3;
+	if (!host_initialized)
+		return;
 
-	if (host_initialized != false) {
-		if (gSpriteList != NULL) {
-			__ptr = gSpriteList;
-			if (gSpriteCount > 0) {
-				iVar2 = 0;
-				iVar3 = 0;
-				do {
-					ppmVar1 = &__ptr->pSprite + iVar2;
-					if (*ppmVar1 != NULL) {
-						// TODO: impl - xWhitey
-						//Mod_UnloadSpriteTextures(*ppmVar1);
-						ppmVar1 = (model_t**)(&gSpriteList->pSprite + iVar2);
-						__ptr = gSpriteList;
-					}
-					if (ppmVar1[1] != (model_t*)0x0) {
-						Mem_Free(ppmVar1[1]);
-						__ptr = gSpriteList;
-					}
-					iVar3 = iVar3 + 1;
-					iVar2 = iVar2 + 12;
-				} while (iVar3 < gSpriteCount);
-			}
-			Mem_Free(__ptr);
+	if (gSpriteList && gSpriteCount > 0)
+	{
+		for (int i = 0; i < gSpriteCount; i++)
+		{
+			//if (gSpriteList[i].pSprite)
+				//Mod_UnloadSpriteTextures(gSpriteList[i].pSprite);
+
+			if (gSpriteList[i].pName)
+				Mem_Free(gSpriteList[i].pName);
 		}
-		gpSprite = NULL;
-		gSpriteList = NULL;
-		gSpriteCount = 0;
-		ghCrosshair = 0;
+
+		Mem_Free(gSpriteList);
 	}
-	return;
+
+	ghCrosshair = NULL;
+	gSpriteList = nullptr;
+	gSpriteCount = 0;
+	gpSprite = nullptr;
 }
 
 void SPR_Shutdown_NoModelFree()
