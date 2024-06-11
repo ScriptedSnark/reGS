@@ -347,7 +347,7 @@ void R_AttachTentToPlayer2(int client, model_s* pModel, float zoffset, float lif
 					//iVar3 = ModelFrameCount(pModel); TODO: impl - xWhitey
 					pTVar2->flags = pTVar2->flags | 0x10100; // unknown flag?? - xWhitey
 					(pTVar2->entity).curstate.framerate = 10.0;
-					pTVar2->frameMax = (float)iVar3;
+					//pTVar2->frameMax = (float)iVar3;
 				}
 				else {
 					pTVar2->frameMax = 0.0;
