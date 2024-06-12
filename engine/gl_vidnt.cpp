@@ -980,26 +980,26 @@ void VID_ShiftPalette()
 void VID_TakeSnapshotRect( const char* pFilename, int x, int y, int w, int h )
 {
 	//TODO: refactor all BMP file I/O to use a single set of functions, types and constants (or a library) - Solokiller
-	const auto iPixels = w * h;
+	const int imageSize = sizeof(RGBTRIPLE) * w * h;
 
-	auto hFile = FS_OpenPathID( pFilename, "wb", "GAMECONFIG" );
+	FileHandle_t hFile = FS_OpenPathID(pFilename, "wb", "GAMECONFIG");
 
-	if( !hFile )
-		Sys_Error( "Couldn't create file for snapshot.\n" );
+	if (!hFile)
+		Sys_Error("Couldn't create file for snapshot.\n");
 
 	BITMAPFILEHEADER hdr;
 	BITMAPINFOHEADER bi;
 
-	hdr.bfSize = 3 * iPixels + sizeof( hdr ) + sizeof( bi );
-	hdr.bfType = 19778;
+	hdr.bfSize = imageSize + sizeof(hdr) + sizeof(bi);
+	hdr.bfType = (long)'MB';
 	hdr.bfReserved1 = 0;
 	hdr.bfReserved2 = 0;
-	hdr.bfOffBits = sizeof( hdr ) + sizeof( bi );
+	hdr.bfOffBits = sizeof(hdr) + sizeof(bi);
 
-	if( FS_Write( &hdr, sizeof( hdr ), hFile ) != sizeof( hdr ) )
-		Sys_Error( "Couldn't write file header to snapshot.\n" );
+	if (FS_Write(&hdr, sizeof(hdr), hFile) != sizeof(hdr))
+		Sys_Error("Couldn't write file header to snapshot.\n");
 
-	bi.biSize = sizeof( bi );
+	bi.biSize = sizeof(bi);
 	bi.biWidth = w;
 	bi.biPlanes = 1;
 	bi.biHeight = h;
@@ -1011,41 +1011,37 @@ void VID_TakeSnapshotRect( const char* pFilename, int x, int y, int w, int h )
 	bi.biBitCount = 24;
 	bi.biCompression = 0;
 
-	if( FS_Write( &bi, sizeof( bi ), hFile ) != sizeof( bi ) )
-		Sys_Error( "Couldn't write bitmap header to snapshot.\n" );
+	if (FS_Write(&bi, sizeof(bi), hFile) != sizeof(bi))
+		Sys_Error("Couldn't write bitmap header to snapshot.\n");
 
-	auto pRed = reinterpret_cast<byte*>( Mem_Malloc( 3 * iPixels ) );
+	byte* pIMGBuffer = (byte*)Mem_Malloc(imageSize);
 
-	if( !pRed )
-		Sys_Error( "Couldn't allocate bitmap header to snapshot.\n" );
+	if (!pIMGBuffer)
+		Sys_Error("Couldn't allocate bitmap header to snapshot.\n");
 
-	qglPixelStorei( GL_PACK_ALIGNMENT, 1 );
-	qglReadPixels( x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE, pRed );
+	qglPixelStorei(GL_PACK_ALIGNMENT, GL_ONE);
+	qglReadPixels(x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE, pIMGBuffer);
 
-	//Convert to BGR
+	// swap rgb to bgr
+	for (int i = sizeof(hdr) + sizeof(bi); i < imageSize; i += sizeof(byte) * sizeof(RGBTRIPLE))
 	{
-		int temp;
-
-		for( int i = 0; i < iPixels; ++i )
-		{
-			temp = pRed[ ( 3 * iPixels ) + 2 ];
-			pRed[ ( 3 * iPixels ) + 2 ] = pRed[ 3 * iPixels ];
-			pRed[ 3 * iPixels ] = temp;
-		}
+		int temp = pIMGBuffer[i];
+		pIMGBuffer[i] = pIMGBuffer[i + 2];
+		pIMGBuffer[i + 2] = temp;
 	}
 
-	const auto iLineSize = 3 * w + ( -3 * w & 3 );
+	const auto iLineSize = sizeof(RGBTRIPLE) * w + (-(int)sizeof(RGBTRIPLE) * w & sizeof(RGBTRIPLE));
 
-	//Write to file, one line of pixels at a time
-	for( int i = 0; i < h; ++i )
+	// Write to file, one line of pixels at a time
+	for (int i = 0; i < h; ++i)
 	{
-		if( iLineSize != FS_Write( pRed + ( 3 * w * i ), iLineSize, hFile ) )
-			Sys_Error( "Couldn't write bitmap data snapshot.\n" );
+		if (iLineSize != FS_Write(pIMGBuffer + (sizeof(RGBTRIPLE) * w * i), iLineSize, hFile))
+			Sys_Error("Couldn't write bitmap data snapshot.\n");
 	}
 
-	Mem_Free( pRed );
+	Mem_Free(pIMGBuffer);
 
-	FS_Close( hFile );
+	FS_Close(hFile);
 }
 
 void VID_TakeSnapshot( const char* pFilename )
